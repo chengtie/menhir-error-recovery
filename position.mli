@@ -11,7 +11,8 @@ type 'a located =
     {
       value    : 'a;
       position : t;
-    } [@@deriving sexp]
+    } 
+    (* [@@deriving sexp] *)
 
 (** [value dv] returns the raw value that underlies the
     decorated value [dv]. *)

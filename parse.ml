@@ -60,6 +60,11 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber: Lexer.t *
         (function EOF | DEF | VAR -> true | _ -> false)
         lex,
       checkpoint)
+  | `FoundExpressionAt checkpoint ->
+      let lex =
+         Lexer.skip_until_before (fun t -> t = SEMICOLON) lex
+      in
+      (lex, checkpoint)
 
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
@@ -68,6 +73,10 @@ let update_last_reduction checkpoint production last_reduction =
      `FoundCommandAt checkpoint
   | X (N N_definition) ->
      `FoundDefinitionAt checkpoint
+  | X (N N_expression) ->
+     Printf.printf "update_last_reduction N N_expression\n";
+     Printf.printf "%s\n" (Symbol.string_of_production production);
+     `FoundExpressionAt checkpoint
   | _ ->
      last_reduction
 
@@ -96,8 +105,7 @@ let parse lexbuf =
        run last_reduction checkpoint lexer (offer checkpoint token)
     | Accepted x ->
        (* We will always return a semantic value. *)
-       Printf.printf "AST:\n";
-       AST.pp_program x;
+       Printf.printf "AST:\n%s\n" (AST.show_program x);
        x
     | Rejected
     | HandlingError _ ->

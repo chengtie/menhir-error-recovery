@@ -75,3 +75,9 @@ let string_of_item (p, i) =
             (if j = i then "." else "") ^ string_of_symbol s)
           (rhs p))
   ^ (if i = List.length (rhs p) then "." else "")
+
+let string_of_production p =
+  string_of_symbol (lhs p) ^ " -> "
+  ^ String.concat " " (
+          List.mapi (fun _ s -> string_of_symbol s)
+          (rhs p))
