@@ -13,7 +13,7 @@ open Parser.MenhirInterpreter
 type ptoken = token * Lexing.position * Lexing.position
 
 module Lexer : sig
-  type t
+  type t = int
   val initialize : Lexing.lexbuf -> unit
   val start : t
   val next  : t -> ptoken * t

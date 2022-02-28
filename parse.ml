@@ -61,10 +61,9 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber: Lexer.t *
         lex,
       checkpoint)
   | `FoundExpressionAt checkpoint ->
-      let lex =
-         Lexer.skip_until_before (fun t -> t = SEMICOLON) lex
-      in
-      (lex, checkpoint)
+      if Lexer.get' lex = RPAREN 
+      then (lex, checkpoint)
+      else failwith "don't know, parse.ml"
 
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
