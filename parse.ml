@@ -74,8 +74,8 @@ let update_last_reduction checkpoint production last_reduction =
   | X (N N_definition) ->
      `FoundDefinitionAt checkpoint
   | X (N N_expression) ->
-     Printf.printf "update_last_reduction N N_expression\n";
-     Printf.printf "%s\n" (Symbol.string_of_production production);
+     (* Printf.printf "update_last_reduction N N_expression\n";
+     Printf.printf "%s\n" (Symbol.string_of_production production); *)
      `FoundExpressionAt checkpoint
   | _ ->
      last_reduction

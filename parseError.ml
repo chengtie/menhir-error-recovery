@@ -12,7 +12,7 @@
 open Parser.MenhirInterpreter
 open PureLexer
 
-let rec pop_until pred env =
+let rec pop_until (pred: element -> xsymbol list) env : xsymbol list =
   match top env with
   | None -> []
   | Some elt ->
@@ -23,13 +23,13 @@ let rec pop_until pred env =
              end
      | l -> l
 
-let keep_predictions predictions (production, focus) =
+let keep_predictions (predictions: xsymbol list) (production, focus) =
   if focus < List.length (rhs production) then
     (lhs production) :: predictions
   else
     predictions
 
-let element_contains_prediction_items elt =
+let element_contains_prediction_items elt : xsymbol list =
   match elt with
   | Element (state, v, startp, endp) ->
     Printf.printf "element number of state %d\n" (number state);
@@ -41,7 +41,8 @@ let element_contains_prediction_items elt =
     | T T_DEF -> Printf.printf "element v DEF\n"
     | _ -> Printf.printf "element v toComplete\n");
     let xs = items state in
-    List.iter (fun x -> Printf.printf "element item: %s\n\n" (Symbol.string_of_item x)) xs;
+    List.iter (fun x -> Printf.printf "element item: %s\n" (Symbol.string_of_item x)) xs;
+    Printf.printf "\n";
     xs |> List.fold_left keep_predictions []
 
 let depth env : int =
@@ -89,7 +90,7 @@ let parse_error pos msg cont =
 
 let contextual_error_msg lexer checkpoint continuation =
   let (nonterminals, currentStateNumber) = find_context checkpoint in
-  ((Error.error "parsing" (Lexer.current_position lexer) (Printf.sprintf "Error State %d while analyzing %s." currentStateNumber (String.concat " or " (List.map Symbol.string_of_symbol nonterminals))))
+  ((Error.error "parsing" (Lexer.current_position lexer) (Printf.sprintf "Error while analyzing %s." (String.concat " or " (List.map Symbol.string_of_symbol nonterminals))))
     continuation
     (Some currentStateNumber))
 

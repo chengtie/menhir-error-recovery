@@ -1,0 +1,459 @@
+program: DEF ID LPAREN ID COMMA VAR
+##
+## Ends in an error in state: 54.
+##
+## separated_nonempty_list(COMMA,identifier) -> identifier COMMA . separated_nonempty_list(COMMA,identifier) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## identifier COMMA
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN ID VAR
+##
+## Ends in an error in state: 53.
+##
+## separated_nonempty_list(COMMA,identifier) -> identifier . [ RPAREN ]
+## separated_nonempty_list(COMMA,identifier) -> identifier . COMMA separated_nonempty_list(COMMA,identifier) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## identifier
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE ID EQ LINT VAR
+##
+## Ends in an error in state: 48.
+##
+## command -> identifier EQ expression . SEMICOLON [ RETURN RBRACE IF ID ]
+## expression -> expression . PLUS expression [ STAR SEMICOLON PLUS EQ ]
+## expression -> expression . STAR expression [ STAR SEMICOLON PLUS EQ ]
+## expression -> expression . EQ expression [ STAR SEMICOLON PLUS EQ ]
+##
+## The known suffix of the stack is as follows:
+## identifier EQ expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE ID EQ VAR
+##
+## Ends in an error in state: 47.
+##
+## command -> identifier EQ . expression SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## identifier EQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE ID VAR
+##
+## Ends in an error in state: 46.
+##
+## command -> identifier . EQ expression SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## identifier
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF LINT THEN LBRACE RBRACE ELSE LBRACE RBRACE VAR
+##
+## Ends in an error in state: 42.
+##
+## command -> IF expression THEN block ELSE block . SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## IF expression THEN block ELSE block
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF LINT THEN LBRACE RBRACE ELSE VAR
+##
+## Ends in an error in state: 41.
+##
+## command -> IF expression THEN block ELSE . block SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## IF expression THEN block ELSE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF LINT THEN LBRACE RBRACE VAR
+##
+## Ends in an error in state: 40.
+##
+## command -> IF expression THEN block . ELSE block SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## IF expression THEN block
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF LINT THEN VAR
+##
+## Ends in an error in state: 39.
+##
+## command -> IF expression THEN . block ELSE block SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## IF expression THEN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF LINT VAR
+##
+## Ends in an error in state: 38.
+##
+## command -> IF expression . THEN block ELSE block SEMICOLON [ RETURN RBRACE IF ID ]
+## expression -> expression . PLUS expression [ THEN STAR PLUS EQ ]
+## expression -> expression . STAR expression [ THEN STAR PLUS EQ ]
+## expression -> expression . EQ expression [ THEN STAR PLUS EQ ]
+##
+## The known suffix of the stack is as follows:
+## IF expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE IF VAR
+##
+## Ends in an error in state: 37.
+##
+## command -> IF . expression THEN block ELSE block SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## IF
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE RBRACE THEN
+##
+## Ends in an error in state: 59.
+##
+## list(definition) -> definition . list(definition) [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## definition
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE RETURN LINT SEMICOLON VAR
+##
+## Ends in an error in state: 50.
+##
+## list(command) -> command . list(command) [ RBRACE ]
+##
+## The known suffix of the stack is as follows:
+## command
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE RETURN LINT VAR
+##
+## Ends in an error in state: 35.
+##
+## command -> RETURN expression . SEMICOLON [ RETURN RBRACE IF ID ]
+## expression -> expression . PLUS expression [ STAR SEMICOLON PLUS EQ ]
+## expression -> expression . STAR expression [ STAR SEMICOLON PLUS EQ ]
+## expression -> expression . EQ expression [ STAR SEMICOLON PLUS EQ ]
+##
+## The known suffix of the stack is as follows:
+## RETURN expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE RETURN VAR
+##
+## Ends in an error in state: 34.
+##
+## command -> RETURN . expression SEMICOLON [ RETURN RBRACE IF ID ]
+##
+## The known suffix of the stack is as follows:
+## RETURN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN LBRACE VAR
+##
+## Ends in an error in state: 33.
+##
+## block -> LBRACE . list(command) RBRACE [ VAR SEMICOLON EOF ELSE DEF ]
+##
+## The known suffix of the stack is as follows:
+## LBRACE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN RPAREN VAR
+##
+## Ends in an error in state: 32.
+##
+## definition -> DEF function_identifier LPAREN loption(separated_nonempty_list(COMMA,identifier)) RPAREN . block [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## DEF function_identifier LPAREN loption(separated_nonempty_list(COMMA,identifier)) RPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID LPAREN VAR
+##
+## Ends in an error in state: 29.
+##
+## definition -> DEF function_identifier LPAREN . loption(separated_nonempty_list(COMMA,identifier)) RPAREN block [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## DEF function_identifier LPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF ID VAR
+##
+## Ends in an error in state: 28.
+##
+## definition -> DEF function_identifier . LPAREN loption(separated_nonempty_list(COMMA,identifier)) RPAREN block [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## DEF function_identifier
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: DEF VAR
+##
+## Ends in an error in state: 26.
+##
+## definition -> DEF . function_identifier LPAREN loption(separated_nonempty_list(COMMA,identifier)) RPAREN block [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## DEF
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: THEN
+##
+## Ends in an error in state: 0.
+##
+## program' -> . program [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ ID LPAREN LINT COMMA VAR
+##
+## Ends in an error in state: 21.
+##
+## separated_nonempty_list(COMMA,expression) -> expression COMMA . separated_nonempty_list(COMMA,expression) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## expression COMMA
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ ID LPAREN LINT VAR
+##
+## Ends in an error in state: 14.
+##
+## expression -> expression . PLUS expression [ STAR RPAREN PLUS EQ COMMA ]
+## expression -> expression . STAR expression [ STAR RPAREN PLUS EQ COMMA ]
+## expression -> expression . EQ expression [ STAR RPAREN PLUS EQ COMMA ]
+## separated_nonempty_list(COMMA,expression) -> expression . [ RPAREN ]
+## separated_nonempty_list(COMMA,expression) -> expression . COMMA separated_nonempty_list(COMMA,expression) [ RPAREN ]
+##
+## The known suffix of the stack is as follows:
+## expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ ID LPAREN VAR
+##
+## Ends in an error in state: 10.
+##
+## expression -> function_identifier LPAREN . loption(separated_nonempty_list(COMMA,expression)) RPAREN [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## function_identifier LPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ ID RETURN
+##
+## Ends in an error in state: 7.
+##
+## function_identifier -> ID . [ LPAREN ]
+## identifier -> ID . [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## ID
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT EQ LINT RETURN
+##
+## Ends in an error in state: 20.
+##
+## expression -> expression . PLUS expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression . STAR expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression . EQ expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression EQ expression . [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## expression EQ expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT EQ VAR
+##
+## Ends in an error in state: 19.
+##
+## expression -> expression EQ . expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## expression EQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT PLUS LINT RETURN
+##
+## Ends in an error in state: 18.
+##
+## expression -> expression . PLUS expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression PLUS expression . [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression . STAR expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+## expression -> expression . EQ expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## expression PLUS expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT PLUS VAR
+##
+## Ends in an error in state: 17.
+##
+## expression -> expression PLUS . expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## expression PLUS
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT STAR VAR
+##
+## Ends in an error in state: 15.
+##
+## expression -> expression STAR . expression [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## expression STAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LINT THEN
+##
+## Ends in an error in state: 25.
+##
+## definition -> VAR identifier EQ expression . [ VAR EOF DEF ]
+## expression -> expression . PLUS expression [ VAR STAR PLUS EQ EOF DEF ]
+## expression -> expression . STAR expression [ VAR STAR PLUS EQ EOF DEF ]
+## expression -> expression . EQ expression [ VAR STAR PLUS EQ EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## VAR identifier EQ expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LPAREN LINT VAR
+##
+## Ends in an error in state: 23.
+##
+## expression -> expression . PLUS expression [ STAR RPAREN PLUS EQ ]
+## expression -> expression . STAR expression [ STAR RPAREN PLUS EQ ]
+## expression -> expression . EQ expression [ STAR RPAREN PLUS EQ ]
+## expression -> LPAREN expression . RPAREN [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN expression
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ LPAREN VAR
+##
+## Ends in an error in state: 5.
+##
+## expression -> LPAREN . expression RPAREN [ VAR THEN STAR SEMICOLON RPAREN PLUS EQ EOF DEF COMMA ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID EQ VAR
+##
+## Ends in an error in state: 4.
+##
+## definition -> VAR identifier EQ . expression [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## VAR identifier EQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR ID VAR
+##
+## Ends in an error in state: 3.
+##
+## definition -> VAR identifier . EQ expression [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## VAR identifier
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+program: VAR VAR
+##
+## Ends in an error in state: 1.
+##
+## definition -> VAR . identifier EQ expression [ VAR EOF DEF ]
+##
+## The known suffix of the stack is as follows:
+## VAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
