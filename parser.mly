@@ -67,6 +67,10 @@ expression: x=LINT
 {
   Call (f, es)
 }
+| LPAREN e=expression RPAREN
+{
+  Paren e
+}
 
 %inline binop:
   PLUS { Add   }

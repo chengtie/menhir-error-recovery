@@ -20,6 +20,7 @@ and expression =
   | Read of identifier
   | Binop of binop * expression * expression
   | Call of function_identifier * expression list
+  | Paren of expression
   | InvalidExpression
 
 and binop = Add | Mul | Equal

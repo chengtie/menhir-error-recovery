@@ -45,7 +45,7 @@ open ParseError
      to start a new definition.
 *)
 let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber: Lexer.t * AST.program checkpoint =
-  (match currentStateNumber with | Some x -> Printf.printf "%d\n" x | None -> Printf.printf "None\n");
+  match currentStateNumber with | _ -> ();
   match last_reduction with
   | `FoundCommandAt checkpoint ->
      let lex =

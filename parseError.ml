@@ -32,16 +32,16 @@ let keep_predictions predictions (production, focus) =
 let element_contains_prediction_items elt =
   match elt with
   | Element (state, v, startp, endp) ->
-    Printf.printf "hahahaha element number of state %d\n" (number state);
-    Printf.printf "hahahaha element startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-    Printf.printf "hahahaha element endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
-    Printf.printf "hahahaha element incoming_symbol %s\n" (Symbol.string_of_symbol (X (incoming_symbol state)));
+    Printf.printf "element number of state %d\n" (number state);
+    Printf.printf "element startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
+    Printf.printf "element endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+    Printf.printf "element incoming_symbol %s\n" (Symbol.string_of_symbol (X (incoming_symbol state)));
     (match incoming_symbol state with
-    | T T_ID -> Printf.printf "hahahaha element v %s\n" v
-    | T T_DEF -> Printf.printf "hahahaha element v DEF\n"
-    | _ -> Printf.printf "hahahaha element v toComplete\n");
+    | T T_ID -> Printf.printf "element v %s\n" v
+    | T T_DEF -> Printf.printf "element v DEF\n"
+    | _ -> Printf.printf "element v toComplete\n");
     let xs = items state in
-    List.iter (fun x -> Printf.printf "hahahaha element item: %s\n" (Symbol.string_of_item x)) xs;
+    List.iter (fun x -> Printf.printf "element item: %s\n\n" (Symbol.string_of_item x)) xs;
     xs |> List.fold_left keep_predictions []
 
 let depth env : int =
@@ -74,12 +74,12 @@ let print_env env =
 
 let find_context = function
   | InputNeeded env ->
-     print_env env;
+     (* print_env env; *)
      Printf.printf "hahahaha depth of env %d\n" (depth env);
      Printf.printf "hahahaha current_state_number %d\n" (current_state_number env);
      let (startp, endp) = positions env in
      Printf.printf "hahahaha startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-     Printf.printf "hahahaha endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+     Printf.printf "hahahaha endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
      (pop_until element_contains_prediction_items env, current_state_number env)
   | _ ->
      assert false (* By the specification of [on_error]. *)
