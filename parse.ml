@@ -44,7 +44,7 @@ open ParseError
      skip the tokens until the next DEF or VAR, that is to what is likely
      to start a new definition.
 *)
-let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber: Lexer.t * AST.program checkpoint =
+let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions env: Lexer.t * AST.program checkpoint =
   match currentStateNumber with | _ -> ();
   match last_reduction with
   | `FoundCommandAt checkpoint ->
@@ -60,10 +60,16 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber: Lexer.t *
         (function EOF | DEF | VAR -> true | _ -> false)
         lex,
       checkpoint)
-  | `FoundExpressionAt checkpoint ->
-      if Lexer.get' lex = RPAREN 
+  | `FoundExpressionAt _ ->
+      (* if Lexer.get' lex = RPAREN 
       then (lex, checkpoint)
-      else failwith "don't know, parse.ml"
+      else ( *)
+      let (startp, endp) = positions in
+      Printf.printf "lilili startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
+      Printf.printf "lilili endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+      let _ = feed (T T_RPAREN) startp () endp env in
+      failwith "don't know, parse.ml"
+      (* ) *)
 
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
@@ -83,8 +89,8 @@ let parse lexbuf =
   Lexer.initialize lexbuf;
 
   let rec on_error last_reduction (lexer : Lexer.t) (checkpoint : AST.program checkpoint) =
-    contextual_error_msg lexer checkpoint (fun currentStateNumber ->
-      resume_on_error last_reduction lexer currentStateNumber
+    contextual_error_msg lexer checkpoint (fun currentStateNumber positions ->
+      resume_on_error last_reduction lexer currentStateNumber positions
     )
 
   (* [run] is the loop function of the parser.
