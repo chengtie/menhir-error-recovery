@@ -36,8 +36,8 @@ let print_element elt: unit =
     Printf.printf "element incoming_symbol %s\n" (Symbol.string_of_symbol (X (incoming_symbol state)));
     let xs = items state in
     List.iter (fun x -> 
-      Printf.printf "element item: %s\n" (Symbol.string_of_item x);
-      let (p, _) = x in Printf.printf "element item: production: %d\n" (production_index p)
+      let (p, _) = x in 
+      Printf.printf "element item: %d: %s\n" (production_index p) (Symbol.string_of_item x)
       ) xs;
     Printf.printf "\n"
 
@@ -90,11 +90,11 @@ let element_contains_prediction_items elt : xsymbol list =
 let find_context = function
   | InputNeeded env ->
      (* print_env env; *)
-     Printf.printf "hahahaha depth of env %d\n" (depth env);
-     Printf.printf "hahahaha current_state_number %d\n" (current_state_number env);
+     Printf.printf "find_context depth of env %d\n" (depth env);
+     Printf.printf "find_context current_state_number %d\n" (current_state_number env);
      let (startp, endp) = positions env in
-     Printf.printf "hahahaha startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-     Printf.printf "hahahaha endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+     Printf.printf "find_context startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
+     Printf.printf "find_context endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
      (pop_until element_contains_prediction_items env, current_state_number env, positions env, env)
   | _ ->
      assert false (* By the specification of [on_error]. *)

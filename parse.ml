@@ -60,7 +60,7 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
         (function EOF | DEF | VAR -> true | _ -> false)
         lex,
       checkpoint)
-  | `FoundExpressionAt _ ->
+  | `FoundExpressionAt checkpoint ->
      let (startp, endp) = positions in
      (* for extra closing parenthesis: *)
      (* if Lexer.get' lex = RPAREN 
@@ -75,6 +75,23 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
      print_env env_new;
      (lex, input_needed env_new) *)
 
+     (* better way, for '(1' or '(1+2' or '(1+2*3' or '((1+2)' we add ')': *)
+     let acceptable_me checkpoint token pos =
+       let triple = (token, pos, pos) in
+       let checkpoint = offer checkpoint triple in
+       match shifts checkpoint with
+       | None -> (false, None)
+       | Some _env -> (true, Some _env)
+     in
+     match acceptable_me checkpoint (RPAREN) endp with
+     | xxx, Some _env ->
+       if xxx then Printf.printf "truetruetrue"
+       else Printf.printf "falsefalsefalse";
+       let env_new = feed (T T_RPAREN) startp () endp _env in
+       let _ = env in
+       (lex, input_needed env_new)
+     | _ -> failwith "hahahaha"
+
      (* for '(1', we add ')': *)
      (* let env_new = force_reduction (find_production 1) env in
      Printf.printf "BEFORE:\n";
@@ -87,7 +104,7 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
      (lex, input_needed env_new_new) *)
 
      (* for '(1+2', we add ')': *)
-     let env_new = force_reduction (find_production 1) env in
+     (* let env_new = force_reduction (find_production 1) env in
      Printf.printf "BEFORE:\n";
      print_env env;
      Printf.printf "\nAFTER:\n";
@@ -98,7 +115,8 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
      let env_new_new_new = feed (T T_RPAREN) startp () endp env_new_new in
      Printf.printf "\nAFTER:AFTER:AFTER:\n";
      print_env env_new_new_new;
-     (lex, input_needed env_new_new_new)
+     (lex, input_needed env_new_new_new) *)
+
       
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
@@ -134,7 +152,8 @@ let parse lexbuf =
   and run last_reduction (input_needed : AST.expression checkpoint) (lexer : Lexer.t) (checkpoint : AST.expression checkpoint) =
     match checkpoint with
     | InputNeeded _ ->
-       Printf.printf "\nInputNeeded\n";
+       Printf.printf "InputNeeded, env always as before\n";
+       (* print_env env; *)
        let token, lexer = Lexer.next lexer in
        (* Notice that we update [input_needed] here. *)
        run last_reduction checkpoint lexer (offer checkpoint token)
@@ -151,12 +170,17 @@ let parse lexbuf =
        let lexer, after_error = on_error last_reduction lexer input_needed in
        Printf.printf "\nafter_error\n";
        run last_reduction input_needed lexer after_error
-    | Shifting _ ->
+    | Shifting (_, _, _) ->
        Printf.printf "\nShifting\n";
+       (* Printf.printf "Before:\n";
+       print_env env_before;
+       Printf.printf "After:\n";
+       print_env env_after; *)
        (* Nothing special here, we simply resume parsing. *)
        run last_reduction input_needed lexer (resume checkpoint)
     | AboutToReduce (_, production) ->
-      Printf.printf "\nAboutToReduce\n";
+      Printf.printf "\nAboutToReduce, env before reduction is always as before\n";
+      (* print_env env; *)
        (* At this point, we recall that the prefix of the input has been
            successfully recognized as a nonterminal. *)
        run
