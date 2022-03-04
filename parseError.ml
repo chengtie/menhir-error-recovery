@@ -104,7 +104,7 @@ let parse_error pos msg cont =
 
 let contextual_error_msg lexer checkpoint continuation =
   let (nonterminals, currentStateNumber, positions, env) = find_context checkpoint in
-  ((Error.error "parsing" (Lexer.current_position lexer) (Printf.sprintf "Error while analyzing %s." (String.concat " or " (List.map Symbol.string_of_symbol nonterminals))))
+  ((Error.error "parsing" (LexerF.current_position lexer) (Printf.sprintf "Error while analyzing %s." (String.concat " or " (List.map Symbol.string_of_symbol nonterminals))))
     continuation
     (Some currentStateNumber)
     positions

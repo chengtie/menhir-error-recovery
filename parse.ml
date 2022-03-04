@@ -44,19 +44,19 @@ open ParseError
      skip the tokens until the next DEF or VAR, that is to what is likely
      to start a new definition.
 *)
-let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions env: Lexer.t * AST.expression checkpoint =
+let resume_on_error last_reduction (lex : LexerF.t) currentStateNumber positions env: LexerF.t * AST.expression checkpoint =
   match currentStateNumber with | _ -> ();
   match last_reduction with
   | `FoundCommandAt checkpoint ->
      let lex =
-       Lexer.skip_until_before (fun t -> t = SEMICOLON || t = RBRACE) lex
+       LexerF.skip_until_before (fun t -> t = SEMICOLON || t = RBRACE) lex
      in
      let lex =
-       if Lexer.get' lex = SEMICOLON then snd (Lexer.next lex) else lex
+       if LexerF.get' lex = SEMICOLON then snd (LexerF.next lex) else lex
      in
      (lex, checkpoint)
   | (`FoundNothingAt checkpoint | `FoundDefinitionAt checkpoint) ->
-     (Lexer.skip_until_before
+     (LexerF.skip_until_before
         (function EOF | DEF | VAR -> true | _ -> false)
         lex,
       checkpoint)
@@ -86,7 +86,7 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
          let env_new = feed (T T_FAKERPAREN) startp () endp _env in
          (lex, input_needed env_new)
        | _ -> 
-         if Lexer.get' lex = RPAREN
+         if LexerF.get' lex = RPAREN
          (* for extra closing parenthesis: *) 
          then (lex, checkpoint)
          else failwith "Other cases")
@@ -106,9 +106,9 @@ let update_last_reduction checkpoint production last_reduction =
      last_reduction
 
 let parse lexbuf =
-  Lexer.initialize lexbuf;
+  LexerF.initialize lexbuf;
 
-  let rec on_error last_reduction (lexer : Lexer.t) (checkpoint : AST.expression checkpoint) =
+  let rec on_error last_reduction (lexer : LexerF.t) (checkpoint : AST.expression checkpoint) =
     contextual_error_msg lexer checkpoint (fun currentStateNumber positions ->
       resume_on_error last_reduction lexer currentStateNumber positions
     )
@@ -122,12 +122,12 @@ let parse lexbuf =
       [lexer] and [checkpoint] are the (purely functional) state of
       the lexer and the parser respectively.
    *)
-  and run last_reduction (input_needed : AST.expression checkpoint) (lexer : Lexer.t) (checkpoint : AST.expression checkpoint) =
+  and run last_reduction (input_needed : AST.expression checkpoint) (lexer : LexerF.t) (checkpoint : AST.expression checkpoint) =
     match checkpoint with
     | InputNeeded _ ->
        Printf.printf "InputNeeded, env always as before\n";
        (* print_env env; *)
-       let token, lexer = Lexer.next lexer in
+       let token, lexer = LexerF.next lexer in
        (* Notice that we update [input_needed] here. *)
        run last_reduction checkpoint lexer (offer checkpoint token)
     | Accepted x ->
@@ -163,9 +163,71 @@ let parse lexbuf =
          (resume checkpoint)
   in
   let checkpoint = expressionEOF lexbuf.lex_curr_p in
-  let lexer = Lexer.start in
+  let lexer = LexerF.start in
   run (`FoundNothingAt checkpoint) checkpoint lexer checkpoint
 
+let acceptable_me checkpoint token pos =
+   let triple = (token, pos, pos) in
+   let checkpoint = offer checkpoint triple in
+   match shifts checkpoint with
+   | None -> (false, None)
+   | Some _env -> (true, Some _env)
+
+let rec fail lexbuf env =
+   Printf.fprintf stderr "At offset %d: syntax error.\n%!" (lexeme_start lexbuf);
+   let (startp, endp) = lexeme_start_p lexbuf, lexeme_end_p lexbuf in
+   match current_state_number env with
+   | 14 ->
+      (* element item: 3: an expression -> an expression + .an expression *)
+      let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+      Printf.printf "BEFORE:\n";
+      print_env env;
+      Printf.printf "\nAFTER:\n";
+      print_env env_new;
+      loop lexbuf (input_needed env_new)
+   | _ -> (
+      (* for '(1' or '(1+2' or '(1+2*3' or '((1+2)' we add ')': *)
+      match acceptable_me (input_needed env) RPAREN endp with
+      | (xxx, Some _env) when xxx ->
+         Printf.printf "Can amend\n";
+         let env_new = feed (T T_FAKERPAREN) startp () endp _env in
+         loop lexbuf (input_needed env_new)
+      | _ -> 
+         Printf.printf "xxx: %s\n" (Symbol.string_of_token (Lexer.token lexbuf));
+         let _ = Lexer.token lexbuf in
+         if Lexer.token lexbuf = RPAREN
+         (* for extra closing parenthesis: *) 
+         then loop lexbuf (input_needed env)
+         else failwith "Other cases")
+
+and loop lexbuf checkpoint =
+   match checkpoint with
+   | InputNeeded _env ->
+      (* The parser needs a token. Request one from the lexer,
+         and offer it to the parser, which will produce a new
+         checkpoint. Then, repeat. *)
+      let token = Lexer.token lexbuf in
+      let startp = lexbuf.lex_start_p
+      and endp = lexbuf.lex_curr_p in
+      let checkpoint = offer checkpoint (token, startp, endp) in
+      loop lexbuf checkpoint
+   | Shifting _ 
+   | AboutToReduce _ ->
+      let checkpoint = resume checkpoint in
+      loop lexbuf checkpoint
+   | HandlingError _env ->
+      fail lexbuf _env
+   | Accepted v ->
+      (* The parser has succeeded and produced a semantic value. Print it. *)
+      Printf.printf "AST:\n%s\n" (AST.show_expression v);
+      checkpoint
+   | Rejected ->
+      (* The parser rejects this input. This cannot happen, here, because
+      we stop as soon as the parser reports [HandlingError]. *)
+      assert false
+
 let _main =
-  Error.resume_on_error ();
-  parse (Lexing.from_channel (open_in Sys.argv.(1)))
+   let lexbuf = Lexing.from_channel (open_in Sys.argv.(1)) in 
+   loop lexbuf (Parser.Incremental.expressionEOF lexbuf.lex_curr_p)
+  (* Error.resume_on_error (); *)
+  (* parse (Lexing.from_channel (open_in Sys.argv.(1))) *)
