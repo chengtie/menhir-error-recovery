@@ -25,7 +25,9 @@ and expression =
   | Binop of binop * expression * expression
   | Call of function_identifier * expression list
   | Paren of expression
+  | ParenFakeRparen of expression
   | InvalidExpression
+  | FakeExpression
   [@@deriving show]
 
 and binop = Add | Mul | Equal

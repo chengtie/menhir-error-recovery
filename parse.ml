@@ -62,61 +62,34 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
       checkpoint)
   | `FoundExpressionAt checkpoint ->
      let (startp, endp) = positions in
-     (* for extra closing parenthesis: *)
-     (* if Lexer.get' lex = RPAREN 
-     then (lex, checkpoint)
-     else ( *)
-     
-     (* for '2+', we add '0': *)
-     (* let env_new = feed (T T_LINT) startp 0 endp env in
-     Printf.printf "BEFORE:\n";
-     print_env env;
-     Printf.printf "\nAFTER:\n";
-     print_env env_new;
-     (lex, input_needed env_new) *)
-
-     (* better way, for '(1' or '(1+2' or '(1+2*3' or '((1+2)' we add ')': *)
-     let acceptable_me checkpoint token pos =
-       let triple = (token, pos, pos) in
-       let checkpoint = offer checkpoint triple in
-       match shifts checkpoint with
-       | None -> (false, None)
-       | Some _env -> (true, Some _env)
-     in
-     match acceptable_me checkpoint (RPAREN) endp with
-     | xxx, Some _env ->
-       if xxx then Printf.printf "truetruetrue"
-       else Printf.printf "falsefalsefalse";
-       let env_new = feed (T T_RPAREN) startp () endp _env in
-       let _ = env in
+     match currentStateNumber with
+     | Some 14 ->
+       (* element item: 3: an expression -> an expression + .an expression *)
+       let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+       Printf.printf "BEFORE:\n";
+       print_env env;
+       Printf.printf "\nAFTER:\n";
+       print_env env_new;
        (lex, input_needed env_new)
-     | _ -> failwith "hahahaha"
-
-     (* for '(1', we add ')': *)
-     (* let env_new = force_reduction (find_production 1) env in
-     Printf.printf "BEFORE:\n";
-     print_env env;
-     Printf.printf "\nAFTER:\n";
-     print_env env_new;
-     let env_new_new = feed (T T_RPAREN) startp () endp env_new in
-     Printf.printf "\nAFTER:AFTER:\n";
-     print_env env_new_new;
-     (lex, input_needed env_new_new) *)
-
-     (* for '(1+2', we add ')': *)
-     (* let env_new = force_reduction (find_production 1) env in
-     Printf.printf "BEFORE:\n";
-     print_env env;
-     Printf.printf "\nAFTER:\n";
-     print_env env_new;
-     let env_new_new = force_reduction (find_production 3) env_new in
-     Printf.printf "\nAFTER:AFTER:\n";
-     print_env env_new_new;
-     let env_new_new_new = feed (T T_RPAREN) startp () endp env_new_new in
-     Printf.printf "\nAFTER:AFTER:AFTER:\n";
-     print_env env_new_new_new;
-     (lex, input_needed env_new_new_new) *)
-
+     | _ -> (
+       (* for '(1' or '(1+2' or '(1+2*3' or '((1+2)' we add ')': *)
+       let acceptable_me checkpoint token pos =
+         let triple = (token, pos, pos) in
+         let checkpoint = offer checkpoint triple in
+         match shifts checkpoint with
+         | None -> (false, None)
+         | Some _env -> (true, Some _env)
+       in
+       match acceptable_me checkpoint RPAREN endp with
+       | (xxx, Some _env) when xxx ->
+         Printf.printf "Can amend";
+         let env_new = feed (T T_FAKERPAREN) startp () endp _env in
+         (lex, input_needed env_new)
+       | _ -> 
+         if Lexer.get' lex = RPAREN
+         (* for extra closing parenthesis: *) 
+         then (lex, checkpoint)
+         else failwith "Other cases")
       
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =

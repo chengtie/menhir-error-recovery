@@ -2,10 +2,12 @@
    open AST
 %}
 
-%token<int> LINT
+%token<int> LINT 
+%token FAKEEXPRESSION
 %token<string> ID
 %token IF THEN ELSE RETURN DEF VAR LPAREN RPAREN COMMA
 %token EOF SEMICOLON PLUS STAR EQ LBRACE RBRACE
+%token FAKERPAREN
 
 /* %start<AST.program> program */
 %start<AST.expression> expressionEOF
@@ -76,6 +78,14 @@ expression: x=LINT
 | LPAREN e=expression RPAREN
 {
   Paren e
+}
+| LPAREN e=expression FAKERPAREN
+{
+  ParenFakeRparen e
+}
+| FAKEEXPRESSION
+{
+  FakeExpression
 }
 
 %inline binop:
