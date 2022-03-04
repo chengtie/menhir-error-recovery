@@ -73,11 +73,12 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
       print_env env;
       Printf.printf "\nAFTER:\n";
       print_env env_new;
+      (lex, input_needed env_new)
       (* force_reduction env_new; *)
       (* (lex, Shifting (env, env_new, true)) *)
       (* (lex, resume checkpoint) *)
       (* (snd (Lexer.next lex), Shifting env_new) *)
-      failwith "don't know what to do next, parse.ml"
+      (* failwith "don't know what to do next, parse.ml" *)
       (* ) *)
 
 (** This function updates the last fully correct state of the parser. *)
