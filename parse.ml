@@ -67,17 +67,17 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
       let (startp, endp) = positions in
       (* Printf.printf "lilili startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
       Printf.printf "lilili endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol); *)
-      let _ = feed (T T_RPAREN) startp () endp env in
-      (* let env_new = feed (T T_LINT) startp 100 endp env in
+      (* let _ = feed (T T_RPAREN) startp () endp env in *)
+      let env_new = feed (T T_LINT) startp 0 endp env in
       Printf.printf "BEFORE:\n";
       print_env env;
       Printf.printf "\nAFTER:\n";
       print_env env_new;
-      force_reduction env_new; *)
+      (* force_reduction env_new; *)
       (* (lex, Shifting (env, env_new, true)) *)
       (* (lex, resume checkpoint) *)
       (* (snd (Lexer.next lex), Shifting env_new) *)
-      failwith "don't know, parse.ml"
+      failwith "don't know what to do next, parse.ml"
       (* ) *)
 
 (** This function updates the last fully correct state of the parser. *)
