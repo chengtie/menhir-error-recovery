@@ -61,26 +61,45 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
         lex,
       checkpoint)
   | `FoundExpressionAt _ ->
-      (* if Lexer.get' lex = RPAREN 
-      then (lex, checkpoint)
-      else ( *)
-      let (startp, endp) = positions in
-      (* Printf.printf "lilili startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-      Printf.printf "lilili endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol); *)
-      (* let _ = feed (T T_RPAREN) startp () endp env in *)
-      let env_new = feed (T T_LINT) startp 0 endp env in
-      Printf.printf "BEFORE:\n";
-      print_env env;
-      Printf.printf "\nAFTER:\n";
-      print_env env_new;
-      (lex, input_needed env_new)
-      (* force_reduction env_new; *)
-      (* (lex, Shifting (env, env_new, true)) *)
-      (* (lex, resume checkpoint) *)
-      (* (snd (Lexer.next lex), Shifting env_new) *)
-      (* failwith "don't know what to do next, parse.ml" *)
-      (* ) *)
+     let (startp, endp) = positions in
+     (* for extra closing parenthesis: *)
+     (* if Lexer.get' lex = RPAREN 
+     then (lex, checkpoint)
+     else ( *)
+     
+     (* for '2+', we add '0': *)
+     (* let env_new = feed (T T_LINT) startp 0 endp env in
+     Printf.printf "BEFORE:\n";
+     print_env env;
+     Printf.printf "\nAFTER:\n";
+     print_env env_new;
+     (lex, input_needed env_new) *)
 
+     (* for '(1', we add ')': *)
+     (* let env_new = force_reduction (find_production 1) env in
+     Printf.printf "BEFORE:\n";
+     print_env env;
+     Printf.printf "\nAFTER:\n";
+     print_env env_new;
+     let env_new_new = feed (T T_RPAREN) startp () endp env_new in
+     Printf.printf "\nAFTER:AFTER:\n";
+     print_env env_new_new;
+     (lex, input_needed env_new_new) *)
+
+     (* for '(1+2', we add ')': *)
+     let env_new = force_reduction (find_production 1) env in
+     Printf.printf "BEFORE:\n";
+     print_env env;
+     Printf.printf "\nAFTER:\n";
+     print_env env_new;
+     let env_new_new = force_reduction (find_production 3) env_new in
+     Printf.printf "\nAFTER:AFTER:\n";
+     print_env env_new_new;
+     let env_new_new_new = feed (T T_RPAREN) startp () endp env_new_new in
+     Printf.printf "\nAFTER:AFTER:AFTER:\n";
+     print_env env_new_new_new;
+     (lex, input_needed env_new_new_new)
+      
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
   match lhs production with
