@@ -57,11 +57,19 @@ let depth env : int =
 
 let print_element elt: unit =
   match elt with
-  | Element (state, _, startp, endp) ->
-    Printf.printf "ha element number of state %d\n" (number state);
-    Printf.printf "ha element startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-    Printf.printf "ha element endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
-    Printf.printf "ha element incoming_symbol %s\n\n" (Symbol.string_of_symbol (X (incoming_symbol state)))
+  | Element (state, v, startp, endp) ->
+    Printf.printf "element number of state %d\n" (number state);
+    (match incoming_symbol state with
+    | T T_ID -> Printf.printf "element v %s\n" v
+    | T T_DEF -> Printf.printf "element v DEF\n"
+    | T T_LINT -> Printf.printf "element v %d\n" v
+    | _ -> Printf.printf "element v toComplete\n");
+    Printf.printf "element startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
+    Printf.printf "element endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+    Printf.printf "element incoming_symbol %s\n" (Symbol.string_of_symbol (X (incoming_symbol state)));
+    let xs = items state in
+    List.iter (fun x -> Printf.printf "element item: %s\n" (Symbol.string_of_item x)) xs;
+    Printf.printf "\n"
 
 let print_env env =
   let i, found = ref (-1), ref false in

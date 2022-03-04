@@ -7,13 +7,19 @@
 %token IF THEN ELSE RETURN DEF VAR LPAREN RPAREN COMMA
 %token EOF SEMICOLON PLUS STAR EQ LBRACE RBRACE
 
-%start<AST.program> program
+/* %start<AST.program> program */
+%start<AST.expression> expressionEOF
 
 %nonassoc EQ
 %left PLUS
 %left STAR
 
 %%
+
+expressionEOF: e=expression EOF
+{
+  e
+}
 
 program: ds=definition* EOF
 {

@@ -44,7 +44,7 @@ open ParseError
      skip the tokens until the next DEF or VAR, that is to what is likely
      to start a new definition.
 *)
-let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions env: Lexer.t * AST.program checkpoint =
+let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions env: Lexer.t * AST.expression checkpoint =
   match currentStateNumber with | _ -> ();
   match last_reduction with
   | `FoundCommandAt checkpoint ->
@@ -65,19 +65,28 @@ let resume_on_error last_reduction (lex : Lexer.t) currentStateNumber positions 
       then (lex, checkpoint)
       else ( *)
       let (startp, endp) = positions in
-      Printf.printf "lilili startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-      Printf.printf "lilili endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
+      (* Printf.printf "lilili startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
+      Printf.printf "lilili endp   %d:%d\n\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol); *)
       let _ = feed (T T_RPAREN) startp () endp env in
+      (* let env_new = feed (T T_LINT) startp 100 endp env in
+      Printf.printf "BEFORE:\n";
+      print_env env;
+      Printf.printf "\nAFTER:\n";
+      print_env env_new;
+      force_reduction env_new; *)
+      (* (lex, Shifting (env, env_new, true)) *)
+      (* (lex, resume checkpoint) *)
+      (* (snd (Lexer.next lex), Shifting env_new) *)
       failwith "don't know, parse.ml"
       (* ) *)
 
 (** This function updates the last fully correct state of the parser. *)
 let update_last_reduction checkpoint production last_reduction =
   match lhs production with
-  | X (N N_command) ->
+  (* | X (N N_command) ->
      `FoundCommandAt checkpoint
   | X (N N_definition) ->
-     `FoundDefinitionAt checkpoint
+     `FoundDefinitionAt checkpoint *)
   | X (N N_expression) ->
      (* Printf.printf "update_last_reduction N N_expression\n";
      Printf.printf "%s\n" (Symbol.string_of_production production); *)
@@ -88,7 +97,7 @@ let update_last_reduction checkpoint production last_reduction =
 let parse lexbuf =
   Lexer.initialize lexbuf;
 
-  let rec on_error last_reduction (lexer : Lexer.t) (checkpoint : AST.program checkpoint) =
+  let rec on_error last_reduction (lexer : Lexer.t) (checkpoint : AST.expression checkpoint) =
     contextual_error_msg lexer checkpoint (fun currentStateNumber positions ->
       resume_on_error last_reduction lexer currentStateNumber positions
     )
@@ -102,15 +111,16 @@ let parse lexbuf =
       [lexer] and [checkpoint] are the (purely functional) state of
       the lexer and the parser respectively.
    *)
-  and run last_reduction (input_needed : AST.program checkpoint) (lexer : Lexer.t) (checkpoint : AST.program checkpoint) =
+  and run last_reduction (input_needed : AST.expression checkpoint) (lexer : Lexer.t) (checkpoint : AST.expression checkpoint) =
     match checkpoint with
     | InputNeeded _ ->
+       Printf.printf "\nInputNeeded\n";
        let token, lexer = Lexer.next lexer in
        (* Notice that we update [input_needed] here. *)
        run last_reduction checkpoint lexer (offer checkpoint token)
     | Accepted x ->
        (* We will always return a semantic value. *)
-       Printf.printf "AST:\n%s\n" (AST.show_program x);
+       Printf.printf "AST:\n%s\n" (AST.show_expression x);
        x
     | Rejected
     | HandlingError _ ->
@@ -119,11 +129,14 @@ let parse lexbuf =
           work together to complete the analysis if the suffix of the
           input is syntactically correct. *)
        let lexer, after_error = on_error last_reduction lexer input_needed in
+       Printf.printf "\nafter_error\n";
        run last_reduction input_needed lexer after_error
     | Shifting _ ->
+       Printf.printf "\nShifting\n";
        (* Nothing special here, we simply resume parsing. *)
        run last_reduction input_needed lexer (resume checkpoint)
     | AboutToReduce (_, production) ->
+      Printf.printf "\nAboutToReduce\n";
        (* At this point, we recall that the prefix of the input has been
            successfully recognized as a nonterminal. *)
        run
@@ -132,7 +145,7 @@ let parse lexbuf =
          lexer
          (resume checkpoint)
   in
-  let checkpoint = program lexbuf.lex_curr_p in
+  let checkpoint = expressionEOF lexbuf.lex_curr_p in
   let lexer = Lexer.start in
   run (`FoundNothingAt checkpoint) checkpoint lexer checkpoint
 
