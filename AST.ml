@@ -28,6 +28,7 @@ and expression =
   | ParenFakeRparen of expression
   | InvalidExpression
   | FakeExpression
+  | ExtraRparen of expression
   [@@deriving show]
 
 and binop = Add | Mul | Equal

@@ -22,6 +22,7 @@ let string_of_token = function
   | DEF -> "DEF"
   | COMMA -> "COMMA"
   | FAKEEXPRESSION -> "FAKEEXPRESSION"
+  | EXTRARPAREN -> "EXTRARPAREN"
 
 let string_of_symbol = function
   | X (T T_error) -> "error"
@@ -75,6 +76,8 @@ let string_of_symbol = function
        "an FakeExpression"
   | X (T T_FAKERPAREN) ->
        "an FakeRparen"
+  | X (T T_EXTRARPAREN) ->
+       "an ExtraRparen"
   | _ -> failwith "symbol.ml"
 
 let string_of_item (p, i) =

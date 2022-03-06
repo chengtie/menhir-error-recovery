@@ -7,7 +7,7 @@
 %token<string> ID
 %token IF THEN ELSE RETURN DEF VAR LPAREN RPAREN COMMA
 %token EOF SEMICOLON PLUS STAR EQ LBRACE RBRACE
-%token FAKERPAREN
+%token FAKERPAREN EXTRARPAREN
 
 /* %start<AST.program> program */
 %start<AST.expression> expressionEOF
@@ -59,7 +59,8 @@ block: LBRACE c=command* RBRACE
   Block c
 }
 
-expression: x=LINT
+expression:
+| x=LINT
 {
   Int x
 }
@@ -86,6 +87,10 @@ expression: x=LINT
 | FAKEEXPRESSION
 {
   FakeExpression
+}
+| e = expression EXTRARPAREN (* for '(3+2))', using error recovery by EXTRARPAREN looks better than using expression RPAREN *)
+{
+   ExtraRparen e
 }
 
 %inline binop:

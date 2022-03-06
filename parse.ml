@@ -176,9 +176,10 @@ let acceptable_me checkpoint token pos =
 let rec fail lexer env =
    let (_, startp, endp) = LexerF.get lexer in
    Printf.printf "Error: startp.pos_cnum: %d, endp.pos_cnum: %d\n" startp.pos_cnum endp.pos_cnum;
+   Printf.printf "current_state_number: %d\n" (current_state_number env);
    match current_state_number env with
-   | 14 ->
-      (* for '2+' or '2*3+', we add a fake expression: *)
+   | 15 ->
+      (* for '2+' or '2*3+', we add a fake expression *)
       (* element item: 3: an expression -> an expression + .an expression *)
       let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
       Printf.printf "BEFORE:\n";
@@ -190,13 +191,16 @@ let rec fail lexer env =
       (* for '(1' or '(1+2' or '(1+2*3' or '((1+2)', we add ')': *)
       match acceptable_me (input_needed env) RPAREN endp with
       | (xxx, Some _env) when xxx ->
-         Printf.printf "Can amend\n";
+         Printf.printf "Adding a ')' can amend\n";
          let env_new = feed (T T_FAKERPAREN) startp () endp _env in
          loop lexer (input_needed env_new)
       | _ -> 
          (* for extra closing parenthesis: *) 
+         Printf.printf "Adding a ')' can NOT amend\n";
          if LexerF.get' lexer = RPAREN
-         then loop lexer (input_needed env)
+         then (
+            let env_new = feed (T T_EXTRARPAREN) startp () endp env in
+            loop lexer (input_needed env_new))
          else failwith "Other cases")
 
 and loop (lexer: LexerF.t) checkpoint =
