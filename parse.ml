@@ -173,7 +173,7 @@ let acceptable_me checkpoint token pos =
    | None -> (false, None)
    | Some _env -> (true, Some _env)
 
-let rec fail lexer env =
+let rec fail (lexer: LexerF.t) env =
    let (_, startp, endp) = LexerF.get lexer in
    Printf.printf "Error: startp.pos_cnum: %d, endp.pos_cnum: %d\n" startp.pos_cnum endp.pos_cnum;
    Printf.printf "current_state_number: %d\n" (current_state_number env);
@@ -186,7 +186,8 @@ let rec fail lexer env =
       print_env env;
       Printf.printf "\nAFTER:\n";
       print_env env_new;
-      loop lexer (input_needed env_new)
+      (* loop lexer (input_needed env_new) *)
+      loop (snd (LexerF.prev lexer)) (input_needed env_new)
    | _ -> (
       (* for '(1' or '(1+2' or '(1+2*3' or '((1+2)', we add ')': *)
       match acceptable_me (input_needed env) RPAREN endp with

@@ -15,6 +15,7 @@
 %nonassoc EQ
 %left PLUS
 %left STAR
+%nonassoc EXTRARPAREN
 
 %%
 

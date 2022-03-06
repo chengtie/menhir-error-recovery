@@ -17,6 +17,7 @@ module LexerF : sig
   val initialize : Lexing.lexbuf -> unit
   val start : t
   val next  : t -> ptoken * t
+  val prev  : t -> ptoken * t 
   val get   : t -> ptoken
   val get'  : t -> token
   val current_position : t -> Position.t
@@ -59,6 +60,13 @@ end = struct
     );
     let pos = pos + 1 in
     (get pos, pos)
+
+  let prev pos =
+    if pos = 0 
+      then failwith "cannot get prev, pureLexer.ml"
+    else
+      let pos = pos -1 in
+      (get pos, pos)
 
   let skip_until_before pred pos =
     let rec aux pos =
