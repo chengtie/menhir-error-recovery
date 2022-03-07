@@ -40,6 +40,7 @@ end = struct
   let start = 0
 
   let get pos =
+    Printf.printf "!size: %d pos: %d len: %d\n" !size pos (List.length !buffer);
     List.nth !buffer (!size - pos)
 
   let token_of_ptoken (p, _, _) = p
@@ -62,6 +63,7 @@ end = struct
     (get pos, pos)
 
   let prev pos =
+    (* if pos = 1 then decr size; *)
     if pos = 0 
       then failwith "cannot get prev, pureLexer.ml"
     else

@@ -177,32 +177,49 @@ let rec fail (lexer: LexerF.t) env =
    let (_, startp, endp) = LexerF.get lexer in
    Printf.printf "Error: startp.pos_cnum: %d, endp.pos_cnum: %d\n" startp.pos_cnum endp.pos_cnum;
    Printf.printf "current_state_number: %d\n" (current_state_number env);
+   print_env env;
    match current_state_number env with
    | 15 ->
       (* for '2+' or '2*3+', we add a fake expression *)
+      (* element incoming_symbol + *)
       (* element item: 3: an expression -> an expression + .an expression *)
       let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
       Printf.printf "BEFORE:\n";
       print_env env;
       Printf.printf "\nAFTER:\n";
       print_env env_new;
-      (* loop lexer (input_needed env_new) *)
+      (* for "2+))", we want to "insert" FAKEEXPRESSION before ')', so we use [prev] to resume from ')' *)
       loop (snd (LexerF.prev lexer)) (input_needed env_new)
-   | _ -> (
+   | 1 ->
+      (* for "()", we add a fake expression *)
+      (* element incoming_symbol ( *)
+      let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+      loop (snd (LexerF.prev lexer)) (input_needed env_new)
+   | 21 -> (
       (* for '(1' or '(1+2' or '(1+2*3' or '((1+2)', we add ')': *)
+      (* element incoming_symbol an expression *)
       match acceptable_me (input_needed env) RPAREN endp with
       | (xxx, Some _env) when xxx ->
          Printf.printf "Adding a ')' can amend\n";
          let env_new = feed (T T_FAKERPAREN) startp () endp _env in
          loop lexer (input_needed env_new)
-      | _ -> 
-         (* for extra closing parenthesis: *) 
-         Printf.printf "Adding a ')' can NOT amend\n";
-         if LexerF.get' lexer = RPAREN
-         then (
-            let env_new = feed (T T_EXTRARPAREN) startp () endp env in
-            loop lexer (input_needed env_new))
-         else failwith "Other cases")
+      | _ -> failwith "don't know, parse.ml")
+   | 25 -> ( 
+      (* for "3)", "4))", "2+3)": *)
+      (* element incoming_symbol an expression *)
+      let env_new = feed (T T_EXTRARPAREN) startp () endp env in
+      loop lexer (input_needed env_new))
+   | 0 ->
+      (* state 0 can be ")", "+", etc. *)
+      if LexerF.get' lexer = RPAREN 
+      (* for ")": *)
+      then ( 
+         let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+         (* loop lexer (input_needed env_new)) *)
+         loop (snd (LexerF.prev lexer)) (input_needed env_new))
+      else failwith "don't know 3, parse.ml"
+   | _ ->
+      failwith "don't know too, parse.ml"
 
 and loop (lexer: LexerF.t) checkpoint =
    match checkpoint with
