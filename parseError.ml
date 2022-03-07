@@ -51,6 +51,22 @@ let print_env env =
     | Some elt -> print_element elt);
   done
 
+let find_element_having_lparen env =
+  let i, exit, positions = ref (-1), ref false, ref None in
+  while not !exit do
+    i := !i + 1;
+    let elt = get !i env in
+    (match elt with
+    | None -> exit := true
+    | Some (Element (state, _, startp, endp)) -> (
+      match incoming_symbol state with 
+      | T T_LPAREN -> 
+        positions := Some (startp, endp);
+        exit := true
+      | _ -> ()));
+  done;
+  !positions
+
 let rec pop_until (pred: element -> xsymbol list) env : xsymbol list =
   match top env with
   | None -> []
@@ -72,19 +88,7 @@ let element_contains_prediction_items elt : xsymbol list =
   match elt with
   | Element (state, _, _, _) ->
     print_element elt;
-    (* Printf.printf "element number of state %d\n" (number state);
-    Printf.printf "element startp %d:%d\n" startp.pos_lnum (startp.pos_cnum - startp.pos_bol);
-    Printf.printf "element endp   %d:%d\n" endp.pos_lnum (endp.pos_cnum - endp.pos_bol);
-    Printf.printf "element incoming_symbol %s\n" (Symbol.string_of_symbol (X (incoming_symbol state)));
-    (match incoming_symbol state with
-    | T T_ID -> Printf.printf "element v %s\n" v
-    | T T_DEF -> Printf.printf "element v DEF\n"
-    | _ -> Printf.printf "element v toComplete\n"); *)
     let xs = items state in
-    (* List.iter (
-      fun x -> Printf.printf "element item: %s\n" (Symbol.string_of_item x); 
-      let (p, _) = x in Printf.printf "element item production: %d\n" (production_index p)) xs;
-    Printf.printf "\n"; *)
     xs |> List.fold_left keep_predictions []
 
 let find_context = function
