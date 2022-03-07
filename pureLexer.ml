@@ -22,25 +22,37 @@ module LexerF : sig
   val get'  : t -> token
   val current_position : t -> Position.t
   val skip_until_before : (token -> bool) -> t -> t
+  val print_state : unit -> unit
 end = struct
 
+  (* a reverse order of tokens *)
   let buffer =
     ref []
 
+  (* like length *)
   let size =
     ref 0
 
+  let print_state () =
+    Printf.printf "size: %d    " !size;
+    Printf.printf "buffer: ";
+    List.iter (fun (x, _, _) -> Printf.printf "%s " (Symbol.string_of_token x)) !buffer;
+    Printf.printf "\n"
+  
   let more = ref (fun () -> assert false)
 
-  let initialize lexbuf =
-    more := lexer_lexbuf_to_supplier Lexer.token lexbuf
+  let initialize (lexbuf: Lexing.lexbuf) =
+    (* A token supplier is a function of no arguments which delivers a new token (together with its start and end positions) every time it is called. *)
+    (* The function lexer_lexbuf_to_supplier, applied to a lexer and to a lexing buffer, produces a fresh supplier. *)
+    more := ((lexer_lexbuf_to_supplier (Lexer.token: Lexing.lexbuf -> token) lexbuf) : supplier)
 
   type t = int
 
   let start = 0
 
+  (* [pos] starts from 1, rather than 0. 
+    (get 1) returns the first token *)
   let get pos =
-    Printf.printf "!size: %d pos: %d len: %d\n" !size pos (List.length !buffer);
     List.nth !buffer (!size - pos)
 
   let token_of_ptoken (p, _, _) = p
@@ -63,11 +75,13 @@ end = struct
     (get pos, pos)
 
   let prev pos =
-    (* if pos = 1 then decr size; *)
-    if pos = 0 
-      then failwith "cannot get prev, pureLexer.ml"
+    if pos <= 0 
+      then failwith "impossible to get the token even before the 0th token, pureLexer.ml"
+    else if pos = 1 then
+      (* there is no token before the first token; the ptoken value here is not significant *)
+      (get pos, 0) 
     else
-      let pos = pos -1 in
+      let pos = pos - 1 in
       (get pos, pos)
 
   let skip_until_before pred pos =

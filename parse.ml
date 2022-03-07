@@ -213,9 +213,9 @@ let rec fail (lexer: LexerF.t) env =
       (* state 0 can be ")", "+", etc. *)
       if LexerF.get' lexer = RPAREN 
       (* for ")": *)
-      then ( 
+      then (
+         (* LexerF.print_state ();  *)
          let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
-         (* loop lexer (input_needed env_new)) *)
          loop (snd (LexerF.prev lexer)) (input_needed env_new))
       else failwith "don't know 3, parse.ml"
    | _ ->
