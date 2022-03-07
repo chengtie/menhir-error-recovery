@@ -1,5 +1,11 @@
 # Example of error recovery with Menhir
 
+- try to parse a formula input
+- based on the state of the occurred error, print error messages with precise locations
+- try to complete AST with fake tokens
+- Continue to end of the input
+- Output a recovered AST and all the error messages
+
 For the demo:
 
 ```
@@ -7,5 +13,4 @@ make
 ./parse example.input
 ```
 
-Look at the comments in `parse.ml` for the implementation technique I
-used.
+Try formulas in https://github.com/chengtie/menhir-error-recovery/issues/1
