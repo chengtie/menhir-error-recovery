@@ -2,7 +2,7 @@
 
 - try to parse a formula input
 - based on the state of the occurred error, print error messages with precise locations
-- try to complete AST with fake tokens and fake semantic values
+- try to resume the parsing and complete the AST with fake tokens and fake semantic values
 - continue to end of the input
 - output a recovered AST and all the error messages
 
