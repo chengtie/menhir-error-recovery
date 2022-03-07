@@ -1,25 +1,4 @@
-type program = definition list
-[@@deriving show]
-
-and definition =
-  | Fun of function_identifier * identifier list * block
-  | Var of identifier * expression
-  | InvalidDefinition
-  [@@deriving show]
-
-and block =
-  | Block of command list
-  | InvalidBlock
-  [@@deriving show]
-
-and command =
-  | Assign of identifier * expression
-  | If of expression * block * block
-  | Return of expression
-  | InvalidCommand
-  [@@deriving show]
-
-and expression =
+type expression =
   | Int of int
   | Read of identifier
   | Binop of binop * expression * expression
