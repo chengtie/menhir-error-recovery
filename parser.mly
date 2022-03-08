@@ -3,7 +3,6 @@
 %}
 
 %token<int> LINT 
-%token FAKEEXPRESSION
 %token<string> ID
 %token IF THEN ELSE RETURN DEF VAR LPAREN RPAREN COMMA
 %token EOF SEMICOLON PLUS STAR EQ LBRACE RBRACE
@@ -85,11 +84,7 @@ expression:
 {
   ParenFakeRparen e
 }
-| FAKEEXPRESSION
-{
-  FakeExpression
-}
-| e = expression EXTRARPAREN (* for '(3+2))', using error recovery by EXTRARPAREN looks better than using expression RPAREN *)
+| e = expression EXTRARPAREN (* for '(3+2))', using error recovery by EXTRARPAREN looks better than using [expression RPAREN] *)
 {
    ExtraRparen e
 }

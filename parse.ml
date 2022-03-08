@@ -26,12 +26,12 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
    Printf.printf "current_state_number: %d\n" (current_state_number env);
    print_env env;
    match current_state_number env with
-   | 15 ->
+   | 14 ->
       (* for "2+", "2*3+", we add a fake expression *)
       (* error message: over '+', "Expression expected" *)
       (* element incoming_symbol + *)
-      let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
-      (* for "2+)", "2+))", we want to "insert" FAKEEXPRESSION before ')', so we use [prev] to resume from ')' *)
+      let env_new = feed (N N_expression) startp FakeExpression endp env in
+      (* for "2+)", "2+))", we want to "insert" FakeExpression before ')', so we use [prev] to resume from ')' *)
       let message = 
          match top env with
          | Some (Element (_, _, startp, endp)) -> 
@@ -44,7 +44,7 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
       (* for "()", we add a fake expression *)
       (* error message: over the whole pair, "Expression expected" *)
       (* element incoming_symbol ( *)
-      let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+      let env_new = feed (N N_expression) startp FakeExpression endp env in
       let message = 
          match top env with
          | Some (Element (_, _, startp', _)) ->
@@ -86,8 +86,7 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
       then (
          (* for ")": *) 
          (* error message: no message besides extra closing parenthesis coming later *)
-         (* LexerF.print_state ();  *)
-         let env_new = feed (T T_FAKEEXPRESSION) startp () endp env in
+         let env_new = feed (N N_expression) startp FakeExpression endp env in
          loop (snd (LexerF.prev lexer)) (input_needed env_new) messages)
       else failwith "don't know 3, parse.ml"
    | _ ->

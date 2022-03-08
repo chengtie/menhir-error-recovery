@@ -21,7 +21,6 @@ let string_of_token = function
   | ELSE -> "ELSE"
   | DEF -> "DEF"
   | COMMA -> "COMMA"
-  | FAKEEXPRESSION -> "FAKEEXPRESSION"
   | EXTRARPAREN -> "EXTRARPAREN"
 
 let string_of_symbol = function
@@ -72,8 +71,6 @@ let string_of_symbol = function
        "a block of commands" *)
   | X (N N_expressionEOF) ->
        "an expressionEOF"
-  | X (T T_FAKEEXPRESSION) ->
-       "an FakeExpression"
   | X (T T_FAKERPAREN) ->
        "an FakeRparen"
   | X (T T_EXTRARPAREN) ->
