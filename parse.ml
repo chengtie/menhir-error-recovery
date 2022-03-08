@@ -13,13 +13,6 @@ open PureLexer
 open ParseError
 open ErrorMessages
 
-let acceptable_me checkpoint token pos =
-   let triple = (token, pos, pos) in
-   let checkpoint = offer checkpoint triple in
-   match shifts checkpoint with
-   | None -> (false, None)
-   | Some _env -> (true, Some _env)
-
 let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
    let (_, startp, endp) = LexerF.get lexer in
    Printf.printf "Error: startp.pos_cnum: %d, endp.pos_cnum: %d\n" startp.pos_cnum endp.pos_cnum;
@@ -52,32 +45,54 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
          | None -> failwith "not possible"
       in
       loop (snd (LexerF.prev lexer)) (input_needed env_new) (messages @ [message])
-   | 21 -> (
+   | 19 -> (
       (* for "(1", "(1+2", "(1+2*3", "((1+2)", we add ')': *)
       (* error message: from (and including) the opening parenthesis, "Unclosed parenthesis - add ')'." *)
       (* element incoming_symbol an expression *)
-      match acceptable_me (input_needed env) RPAREN endp with
-      | (xxx, Some _env) when xxx ->
-         Printf.printf "Adding a ')' can amend\n";
-         let env_new = feed (T T_FAKERPAREN) startp () endp _env in
-         let startp' =
-            match find_element_having_lparen env with
-            | Some (s, _) -> s
-            | None -> failwith "not possible"
-         in
-         let message = 
-            match top env with
-            | Some (Element (_, _, _, endp)) ->
-               Messages.make startp'.pos_cnum endp.pos_cnum "Unclosed parenthesis - add ')'."
-            | None -> failwith "not possible"
-         in    
-         loop lexer (input_needed env_new) (messages @ [message])
-      | _ -> failwith "don't know, parse.ml")
-   | 25 -> ( 
+      let semv = 
+         match top env with
+         | Some (Element (s, v, _, _)) -> (
+            match incoming_symbol s with
+            | N N_expression -> AST.ExtraRparen v
+            | _ -> failwith "not possible")
+         | _ -> failwith "not possible"
+      in
+      let env_new = 
+         match pop_many 2 env with
+         | Some x -> x
+         | _ -> failwith "not possible"
+      in
+      let env_new = feed (N N_expression) startp semv endp env_new in
+      let startp' =
+         match find_element_having_lparen env with
+         | Some (s, _) -> s
+         | _ -> failwith "not possible"
+      in
+      let message = 
+         match top env with
+         | Some (Element (_, _, _, endp)) ->
+            Messages.make startp'.pos_cnum endp.pos_cnum "Unclosed parenthesis - add ')'."
+         | _ -> failwith "not possible"
+      in    
+      loop lexer (input_needed env_new) (messages @ [message]))
+   | 24 -> ( 
       (* for "3)", "4))", "2+3)": *)
       (* error message: on the closing parenthesis, "Extra closing parenthesis." *)
       (* element incoming_symbol an expression *)
-      let env_new = feed (T T_EXTRARPAREN) startp () endp env in
+      let semv = 
+         match top env with
+         | Some (Element (s, v, _, _)) -> (
+            match incoming_symbol s with
+            | N N_expression -> AST.ExtraRparen v
+            | _ -> failwith "not possible")
+         | _ -> failwith "not possible"
+      in
+      let env_new = 
+         match pop env with
+         | Some x -> x
+         | _ -> failwith "not possible"
+      in
+      let env_new = feed (N N_expression) startp semv endp env_new in
       let message = Messages.make startp.pos_cnum endp.pos_cnum "Extra closing parenthesis." in
       loop lexer (input_needed env_new) (messages @ [message]))
    | 0 ->

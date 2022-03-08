@@ -6,7 +6,6 @@
 %token<string> ID
 %token IF THEN ELSE RETURN DEF VAR LPAREN RPAREN COMMA
 %token EOF SEMICOLON PLUS STAR EQ LBRACE RBRACE
-%token FAKERPAREN EXTRARPAREN
 
 /* %start<AST.program> program */
 %start<AST.expression> expressionEOF
@@ -14,7 +13,6 @@
 %nonassoc EQ
 %left PLUS
 %left STAR
-%nonassoc EXTRARPAREN
 
 %%
 
@@ -79,14 +77,6 @@ expression:
 | LPAREN e=expression RPAREN
 {
   Paren e
-}
-| LPAREN e=expression FAKERPAREN
-{
-  ParenFakeRparen e
-}
-| e = expression EXTRARPAREN (* for '(3+2))', using error recovery by EXTRARPAREN looks better than using [expression RPAREN] *)
-{
-   ExtraRparen e
 }
 
 %inline binop:

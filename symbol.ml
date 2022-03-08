@@ -7,7 +7,6 @@ let string_of_token = function
   | STAR -> "STAR"
   | SEMICOLON -> "SEMICOLON"
   | RPAREN -> "RPAREN"
-  | FAKERPAREN -> "FAKERPAREN"
   | RETURN -> "RETURN"
   | RBRACE -> "RBRACE"
   | PLUS -> "PLUS"
@@ -21,8 +20,7 @@ let string_of_token = function
   | ELSE -> "ELSE"
   | DEF -> "DEF"
   | COMMA -> "COMMA"
-  | EXTRARPAREN -> "EXTRARPAREN"
-
+  
 let string_of_symbol = function
   | X (T T_error) -> "error"
   | X (T T_VAR) -> "a variable"
@@ -71,10 +69,6 @@ let string_of_symbol = function
        "a block of commands" *)
   | X (N N_expressionEOF) ->
        "an expressionEOF"
-  | X (T T_FAKERPAREN) ->
-       "an FakeRparen"
-  | X (T T_EXTRARPAREN) ->
-       "an ExtraRparen"
   | _ -> failwith "symbol.ml"
 
 let string_of_item (p, i) =
