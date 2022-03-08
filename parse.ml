@@ -13,30 +13,59 @@ open PureLexer
 open ParseError
 open ErrorMessages
 
+let compare_symbolss xs ys =
+   List.for_all2 (fun x y -> compare_symbols x y = 0) xs ys
+
+let contain_item env r ls index =
+   match top env with
+   | Some Element (s, _, _, _) ->
+      let items = items s in
+      List.exists (fun (p, i) ->
+         compare_symbols (lhs p) r = 0 &&
+         compare_symbolss (rhs p) ls &&
+         i = index
+      ) items
+   | None -> false
+
+(* for "3)", "4))", "2+3)": *)
+let case0 lexer env =
+   LexerF.get' lexer = RPAREN && (
+   match top env with
+   | Some (Element (s, _, _, _)) -> (
+      match incoming_symbol s with 
+      | N N_expression -> true
+      | _ -> false)
+   | _ -> false)
+
+(* for ")": *)
+let case1 lexer env =
+   LexerF.get' lexer = RPAREN && (
+   match top env with
+   | Some _ -> false
+   | _ -> true)
+   
 let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
    let (_, startp, endp) = LexerF.get lexer in
    Printf.printf "Error: startp.pos_cnum: %d, endp.pos_cnum: %d\n" startp.pos_cnum endp.pos_cnum;
    Printf.printf "current_state_number: %d\n" (current_state_number env);
    print_env env;
-   match current_state_number env with
-   | 14 ->
-      (* for "2+", "2*3+", we add a fake expression *)
+   if contain_item env (X (N N_expression)) [X (N N_expression); X (T T_PLUS); X (N N_expression)] 2 then
+      (* for "2+", "2*3+": *)
       (* error message: over '+', "Expression expected" *)
-      (* element incoming_symbol + *)
+      (* element item: 3: an expression -> an expression + .an expression *)
       let env_new = feed (N N_expression) startp FakeExpression endp env in
       (* for "2+)", "2+))", we want to "insert" FakeExpression before ')', so we use [prev] to resume from ')' *)
       let message = 
          match top env with
-         | Some (Element (_, _, startp, endp)) -> 
-            (* the position of '+' *)
+         | Some (Element (_, _, startp, endp)) ->
             Messages.make startp.pos_cnum endp.pos_cnum "Expression expected"
          | None -> failwith "not possible"
       in
       loop (snd (LexerF.prev lexer)) (input_needed env_new) (messages @ [message])
-   | 1 ->
-      (* for "()", we add a fake expression *)
+   else if contain_item env (X (N N_expression)) [X (T T_LPAREN); X (N N_expression); X (T T_RPAREN)] 1 then
+      (* for "()": *)
       (* error message: over the whole pair, "Expression expected" *)
-      (* element incoming_symbol ( *)
+      (* element item: 7: an expression -> ( .an expression ) *)
       let env_new = feed (N N_expression) startp FakeExpression endp env in
       let message = 
          match top env with
@@ -45,10 +74,10 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
          | None -> failwith "not possible"
       in
       loop (snd (LexerF.prev lexer)) (input_needed env_new) (messages @ [message])
-   | 19 -> (
-      (* for "(1", "(1+2", "(1+2*3", "((1+2)", we add ')': *)
+   else if contain_item env (X (N N_expression)) [X (T T_LPAREN); X (N N_expression); X (T T_RPAREN)] 2 then
+      (* for "(1", "(1+2", "(1+2*3", "((1+2)": *)
       (* error message: from (and including) the opening parenthesis, "Unclosed parenthesis - add ')'." *)
-      (* element incoming_symbol an expression *)
+      (* element item: 7: an expression -> ( an expression .) *)
       let semv = 
          match top env with
          | Some (Element (s, v, _, _)) -> (
@@ -74,8 +103,8 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
             Messages.make startp'.pos_cnum endp.pos_cnum "Unclosed parenthesis - add ')'."
          | _ -> failwith "not possible"
       in    
-      loop lexer (input_needed env_new) (messages @ [message]))
-   | 24 -> ( 
+      loop lexer (input_needed env_new) (messages @ [message])
+   else if case0 lexer env then 
       (* for "3)", "4))", "2+3)": *)
       (* error message: on the closing parenthesis, "Extra closing parenthesis." *)
       (* element incoming_symbol an expression *)
@@ -94,18 +123,14 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
       in
       let env_new = feed (N N_expression) startp semv endp env_new in
       let message = Messages.make startp.pos_cnum endp.pos_cnum "Extra closing parenthesis." in
-      loop lexer (input_needed env_new) (messages @ [message]))
-   | 0 ->
-      (* state 0 can be ")", "+", etc. *)
-      if LexerF.get' lexer = RPAREN 
-      then (
-         (* for ")": *) 
-         (* error message: no message besides extra closing parenthesis coming later *)
-         let env_new = feed (N N_expression) startp FakeExpression endp env in
-         loop (snd (LexerF.prev lexer)) (input_needed env_new) messages)
-      else failwith "don't know 3, parse.ml"
-   | _ ->
-      failwith "don't know too, parse.ml"
+      loop lexer (input_needed env_new) (messages @ [message])
+   else if case1 lexer env then
+      (* for ")": *) 
+      (* error message: no message besides extra closing parenthesis coming later *)
+      (* element incoming_symbol an expression *)
+      let env_new = feed (N N_expression) startp FakeExpression endp env in
+      loop (snd (LexerF.prev lexer)) (input_needed env_new) messages
+   else failwith "don't know too, parse.ml"
 
 and loop (lexer: LexerF.t) checkpoint messages =
    match checkpoint with
