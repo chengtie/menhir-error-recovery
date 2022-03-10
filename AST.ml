@@ -8,6 +8,7 @@ type expression =
   | InvalidExpression
   | FakeExpression
   | ExtraRparen of expression
+  | UnclosedLparen of expression
   [@@deriving show]
 
 and binop = Add | Mul | Equal

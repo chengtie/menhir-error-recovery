@@ -82,7 +82,7 @@ let rec fail (lexer: LexerF.t) env (messages: Messages.t list) =
          match top env with
          | Some (Element (s, v, _, _)) -> (
             match incoming_symbol s with
-            | N N_expression -> AST.ExtraRparen v
+            | N N_expression -> AST.UnclosedLparen v
             | _ -> failwith "not possible")
          | _ -> failwith "not possible"
       in
